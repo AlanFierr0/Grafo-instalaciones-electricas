@@ -1,6 +1,9 @@
 import matplotlib.pyplot as plt
 import networkx as nx
 from collections import defaultdict
+import heapq
+import timeit
+import random
 
 
 class WeightedGraph:
@@ -21,6 +24,24 @@ class WeightedGraph:
         for u, v, weight in connections:
             self.add_edge(u, v, weight)
 
+    def find_mst_prim(self):
+        start_node = list(self.graph.keys())[0]
+        visited = {start_node}
+        mst_edges = []
+        min_heap = [(weight, start_node, neighbor) for neighbor, weight in self.graph[start_node]]
+        heapq.heapify(min_heap)
+
+        while min_heap and len(visited) < len(self.graph):
+            weight, u, v = heapq.heappop(min_heap)
+            if v not in visited:
+                visited.add(v)
+                mst_edges.append((weight, u, v))
+                for neighbor, next_weight in self.graph[v]:
+                    if neighbor not in visited:
+                        heapq.heappush(min_heap, (next_weight, v, neighbor))
+
+        return mst_edges
+
     def display_graph(self):
         for node in self.graph:
             print(f"{node}: {self.graph[node]}")
@@ -31,10 +52,10 @@ class WeightedGraph:
             G.add_edge(u, v, weight=weight)
 
         if additional_edges:
-            for _, u, v in additional_edges:
-                G.add_edge(u, v, weight='Redundante')
+            for weight, u, v in additional_edges:
+                G.add_edge(u, v, weight=weight)
 
-        pos = nx.spring_layout(G)  # Layout para posicionar los nodos
+        pos = nx.spring_layout(G)
         labels = nx.get_edge_attributes(G, 'weight')
         nx.draw(G, pos, with_labels=True, node_color='skyblue', node_size=1500, font_size=15, font_weight='bold',
                 edge_color='gray')
@@ -43,28 +64,84 @@ class WeightedGraph:
         plt.show()
 
 
-if __name__ == "__main__":
+def generate_random_graph(num_nodes, density=0.5, weight_range=(1, 100)):
     graph = WeightedGraph()
-    power_plants = ['A', 'B', 'C', 'D', 'E', 'F']
-    connections = [
-        ('A', 'B', 10),
-        ('A', 'C', 20),
-        ('A', 'D', 25),
-        ('A', 'E', 30),
-        ('A', 'F', 35),
-        ('B', 'C', 15),
-        ('B', 'D', 20),
-        ('B', 'E', 40),
-        ('B', 'F', 45),
-        ('C', 'D', 10),
-        ('C', 'E', 25),
-        ('C', 'F', 50),
-        ('D', 'E', 15),
-        ('D', 'F', 30),
-        ('E', 'F', 20)
-    ]
+    nodes = [f"Node{i}" for i in range(num_nodes)]
+    edges = []
 
-    graph.model_energy_infrastructure(power_plants, connections)
+    for i in range(num_nodes):
+        for j in range(i + 1, num_nodes):
+            if random.random() <= density:
+                weight = random.randint(*weight_range)
+                edges.append((nodes[i], nodes[j], weight))
 
-    graph.visualize_graph(title="Original")
+    graph.model_energy_infrastructure(nodes, edges)
+    return graph
+
+
+def run_performance_tests():
+    sizes = [10, 100, 1000, 5000]  # Tamaños de grafos
+    densities = [0.2, 0.5, 0.8]  # Densidades de grafos
+    results = []
+
+    for size in sizes:
+        for density in densities:
+            graph = generate_random_graph(size, density)
+            time_taken = timeit.timeit(graph.find_mst_prim, number=1)
+            results.append((size, density, time_taken))
+            print(f"Grafo de {size} nodos, densidad {density}: {time_taken:.6f} segundos")
+
+    return results
+
+
+if __name__ == "__main__":
+    # # Grafo de ejemplo inicial
+    # graph = WeightedGraph()
+    # power_plants = ['A', 'B', 'C', 'D', 'E', 'F']
+    # connections = [
+    #     ('A', 'B', 10),
+    #     ('A', 'C', 20),
+    #     ('A', 'D', 25),
+    #     ('A', 'E', 30),
+    #     ('A', 'F', 35),
+    #     ('B', 'C', 15),
+    #     ('B', 'D', 20),
+    #     ('B', 'E', 40),
+    #     ('B', 'F', 45),
+    #     ('C', 'D', 10),
+    #     ('C', 'E', 25),
+    #     ('C', 'F', 50),
+    #     ('D', 'E', 15),
+    #     ('D', 'F', 30),
+    #     ('E', 'F', 20)
+    # ]
+    #
+    # graph.model_energy_infrastructure(power_plants, connections)
+    # graph.visualize_graph(title="Infraestructura Energética Original")
+    #
+    # mst_edges = graph.find_mst_prim()
+    # print("Árbol de Expansión Mínima (MST):", mst_edges)
+
+    # Pruebas de rendimiento
+    print("\nResultados de pruebas de performance:")
+    results = run_performance_tests()
+
+    sizes, densities, times = zip(*results)
+    unique_sizes = sorted(set(sizes))  # Obtener los valores únicos y ordenarlos
+
+    # Crear un mapa de los valores de tamaño a índices equidistantes
+    size_to_index = {size: index for index, size in enumerate(unique_sizes)}
+    x_positions = [size_to_index[size] for size in sizes]  # Convertir los tamaños a posiciones equidistantes
+
+    plt.figure(figsize=(12, 6))
+    plt.scatter(x_positions, times, c=densities, cmap="viridis", s=100, alpha=0.7)
+    plt.colorbar(label="Densidad")
+    plt.xlabel("Número de nodos")
+    plt.ylabel("Tiempo de ejecución (segundos)")
+    plt.title("Performance del Algoritmo de Prim en Grafos de Diferentes Tamaños y Densidades")
+
+    # Configurar los valores y etiquetas del eje x para que sean equidistantes
+    plt.xticks(range(len(unique_sizes)), unique_sizes)  # Colocar los valores de unique_sizes en el eje x
+
+    plt.show()
 
