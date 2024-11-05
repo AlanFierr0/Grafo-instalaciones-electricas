@@ -95,43 +95,35 @@ def run_performance_tests():
 
 
 if __name__ == "__main__":
-    # # Grafo de ejemplo inicial
-    # graph = WeightedGraph()
-    # power_plants = ['A', 'B', 'C', 'D', 'E', 'F']
-    # connections = [
-    #     ('A', 'B', 10),
-    #     ('A', 'C', 20),
-    #     ('A', 'D', 25),
-    #     ('A', 'E', 30),
-    #     ('A', 'F', 35),
-    #     ('B', 'C', 15),
-    #     ('B', 'D', 20),
-    #     ('B', 'E', 40),
-    #     ('B', 'F', 45),
-    #     ('C', 'D', 10),
-    #     ('C', 'E', 25),
-    #     ('C', 'F', 50),
-    #     ('D', 'E', 15),
-    #     ('D', 'F', 30),
-    #     ('E', 'F', 20)
-    # ]
-    #
-    # graph.model_energy_infrastructure(power_plants, connections)
-    # graph.visualize_graph(title="Infraestructura Energética Original")
-    #
-    # mst_edges = graph.find_mst_prim()
-    # print("Árbol de Expansión Mínima (MST):", mst_edges)
+    graph = WeightedGraph()
+    power_plants = ['A', 'B', 'C', 'D', 'E', 'F']
+    connections = [
+        ('A', 'B', 10),
+        ('B', 'C', 15),
+        ('C', 'D', 10),
+        ('D', 'E', 15),
+        ('E', 'F', 20),
+        # Conexiones de redundancia
+        ('A', 'C', 20),
+        ('C', 'E', 25),
+        ('B', 'D', 20),
+        ('A', 'F', 40),
+    ]
 
-    # Pruebas de rendimiento
+    graph.model_energy_infrastructure(power_plants, connections)
+    graph.visualize_graph(title="Infraestructura Energética Original")
+
+    mst_edges = graph.find_mst_prim()
+    print("Árbol de Expansión Mínima (MST):", mst_edges)
+
     print("\nResultados de pruebas de performance:")
     results = run_performance_tests()
 
     sizes, densities, times = zip(*results)
-    unique_sizes = sorted(set(sizes))  # Obtener los valores únicos y ordenarlos
+    unique_sizes = sorted(set(sizes))
 
-    # Crear un mapa de los valores de tamaño a índices equidistantes
     size_to_index = {size: index for index, size in enumerate(unique_sizes)}
-    x_positions = [size_to_index[size] for size in sizes]  # Convertir los tamaños a posiciones equidistantes
+    x_positions = [size_to_index[size] for size in sizes]
 
     plt.figure(figsize=(12, 6))
     plt.scatter(x_positions, times, c=densities, cmap="viridis", s=100, alpha=0.7)
@@ -140,8 +132,7 @@ if __name__ == "__main__":
     plt.ylabel("Tiempo de ejecución (segundos)")
     plt.title("Performance del Algoritmo de Prim en Grafos de Diferentes Tamaños y Densidades")
 
-    # Configurar los valores y etiquetas del eje x para que sean equidistantes
-    plt.xticks(range(len(unique_sizes)), unique_sizes)  # Colocar los valores de unique_sizes en el eje x
+    plt.xticks(range(len(unique_sizes)), unique_sizes)
 
     plt.show()
 
