@@ -39,12 +39,7 @@ class WeightedGraph:
                 for neighbor, next_weight in self.graph[v]:
                     if neighbor not in visited:
                         heapq.heappush(min_heap, (next_weight, v, neighbor))
-
         return mst_edges
-
-    def display_graph(self):
-        for node in self.graph:
-            print(f"{node}: {self.graph[node]}")
 
     def visualize_graph(self, additional_edges=None, title="Infraestructura Energética"):
         G = nx.Graph()
@@ -80,8 +75,8 @@ def generate_random_graph(num_nodes, density=0.5, weight_range=(1, 100)):
 
 
 def run_performance_tests():
-    sizes = [10, 100, 1000, 5000]  # Tamaños de grafos
-    densities = [0.2, 0.5, 0.8]  # Densidades de grafos
+    sizes = [10, 100, 1000, 5000]
+    densities = [0.2, 0.5, 0.8]
     results = []
 
     for size in sizes:
