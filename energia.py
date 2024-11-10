@@ -123,7 +123,7 @@ if __name__ == "__main__":
 
 
     def run_performance_tests():
-        sizes = [10, 100, 500, 1000, 2000]
+        sizes = [10, 100, 500, 1000, 1500, 2000]
         results = []
 
         for size in sizes:
@@ -145,7 +145,7 @@ if __name__ == "__main__":
     x_positions = [size_to_index[size] for size in sizes]
 
     plt.figure(figsize=(12, 6))
-    plt.scatter(x_positions, times, cmap="viridis", s=100, alpha=0.7)
+    plt.scatter(x_positions, times, s=100, alpha=0.7)
     plt.xlabel("Número de nodos")
     plt.ylabel("Tiempo de ejecución (segundos)")
     plt.title("Performance del Algoritmo de Prim en Grafos de Diferentes Tamaños")
